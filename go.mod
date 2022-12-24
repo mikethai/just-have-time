@@ -8,6 +8,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/githubnemo/CompileDaemon v1.4.0 // indirect
 	github.com/gofiber/fiber/v2 v2.40.1 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/klauspost/compress v1.15.13 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect

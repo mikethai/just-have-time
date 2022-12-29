@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
+	"github.com/mikethai/just-have-time/router"
 )
 
 func main() {
@@ -15,9 +16,8 @@ func main() {
 		return c.SendString("Hello, World 👋!")
 	})
 
-	app.Get("/test", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, Test Just have time 👋!")
-	})
+	// Setup the router
+	router.SetupRoutes(app)
 
 	app.Listen(":80")
 }

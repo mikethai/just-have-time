@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/mikethai/just-have-time/config"
+	"github.com/mikethai/just-have-time/internal/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -33,4 +34,11 @@ func ConnectDB() {
 	}
 
 	fmt.Println("Connection Opened to Database")
+
+	// Migrate the database
+	DB.AutoMigrate(&model.User{}, &model.Song{}, &model.Hashtag{}, &model.Follow{}, &model.StorySong{})
+
+	// DB.Migrator().DropTable(&model.User{}, &model.Song{}, &model.Hashtag{}, &model.Follow{}, &model.StorySong{})
+
+	fmt.Println("Database Migrated")
 }

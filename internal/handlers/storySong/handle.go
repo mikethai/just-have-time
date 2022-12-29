@@ -1,6 +1,8 @@
 package storySongHandler
 
 import (
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
 	"github.com/mikethai/just-have-time/internal/model"
@@ -8,12 +10,17 @@ import (
 
 type Handler struct {
 	repository Repository
+	httpClient HttpClient
 }
 
 func NewHandler() *Handler {
 	r := NewRepository(database.DB)
+	c := NewHttpClient(&http.Client{})
 
-	return &Handler{repository: r}
+	return &Handler{
+		repository: r,
+		httpClient: c,
+	}
 }
 
 type StorySong struct {
@@ -33,7 +40,7 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 
 		songID := storySong.SongID
 		msno := storySong.Msno
-		songInfo, _ := h.repository.GetSongInfo(songID)
+		songInfo, _ := h.httpClient.GetSongInfo(songID)
 
 		for _, hashtag := range storySong.Hashtag {
 			newHastags = append(newHastags, hashtag.Name)

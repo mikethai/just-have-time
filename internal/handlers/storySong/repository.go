@@ -1,11 +1,6 @@
 package storySongHandler
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
-
-	"github.com/mikethai/just-have-time/config"
 	"github.com/mikethai/just-have-time/internal/model"
 
 	"gorm.io/gorm"
@@ -15,7 +10,6 @@ type Repository interface {
 	List() ([]model.StorySong, error)
 	Create(param *CreateParameter) (*model.StorySong, error)
 	CreateHashTag(param *CreateHashTagParameter) (*model.StorySong, error)
-	GetSongInfo(songID string) (*SongInfo, error)
 }
 
 type repository struct {
@@ -37,41 +31,6 @@ type CreateParameter struct {
 type CreateHashTagParameter struct {
 	storySongModel model.StorySong
 	Hashtags       []string
-}
-
-type GetSongInfoParameter struct {
-	SongID string
-}
-
-type SongInfo struct {
-	Id       string    `json:"id"`
-	Name     string    `json:"name"`
-	Duration int       `json:"duration"`
-	Isrc     string    `json:"isrc"`
-	Url      string    `json:"url"`
-	Album    AlbumInfo `json:"album"`
-}
-
-type AlbumInfo struct {
-	Id          string      `json:"id"`
-	Name        string      `json:"name"`
-	Url         string      `json:"url"`
-	ReleaseDate string      `json:"release_date"`
-	Images      []ImageInfo `json:"images"`
-	Artist      ArtistInfo  `json:"artist"`
-}
-
-type ImageInfo struct {
-	Height int    `json:"height"`
-	Width  int    `json:"width"`
-	Url    string `json:"url"`
-}
-
-type ArtistInfo struct {
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Url    string `json:"url"`
-	Images []ImageInfo
 }
 
 func (r *repository) List() ([]model.StorySong, error) {
@@ -112,29 +71,4 @@ func (r *repository) CreateHashTag(param *CreateHashTagParameter) (*model.StoryS
 	}
 
 	return &param.storySongModel, nil
-}
-
-func (r *repository) GetSongInfo(songID string) (*SongInfo, error) {
-	url := "https://api.kkbox.com/v1.1/tracks/" + songID + "?territory=TW"
-
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
-	bearerToken := config.Config("KKBOX_OPENAPI_BEARER_TOKEN")
-	req.Header.Add("Authorization", "Bearer "+bearerToken)
-
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	reqBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var songInfo SongInfo
-	json.Unmarshal(reqBody, &songInfo)
-
-	return &songInfo, nil
 }

@@ -1,10 +1,13 @@
 package storySongHandler
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 
+	"cloud.google.com/go/firestore"
 	"github.com/mikethai/just-have-time/config"
 )
 
@@ -23,56 +26,85 @@ func NewHttpClient(client *http.Client) *httpClient {
 }
 
 type SongInfo struct {
-	Id       string    `json:"id"`
-	Name     string    `json:"name"`
-	Duration int       `json:"duration"`
-	Isrc     string    `json:"isrc"`
-	Url      string    `json:"url"`
-	Album    AlbumInfo `json:"album"`
+	Id       string    `json:"id" firestore:"id,omitempty"`
+	Name     string    `json:"name" firestore:"name,omitempty"`
+	Duration int       `json:"duration" firestore:"duration,omitempty"`
+	Isrc     string    `json:"isrc" firestore:"isrc,omitempty"`
+	Url      string    `json:"url" firestore:"url,omitempty"`
+	Album    AlbumInfo `json:"album" firestore:"album,omitempty"`
 }
 
 type AlbumInfo struct {
-	Id          string      `json:"id"`
-	Name        string      `json:"name"`
-	Url         string      `json:"url"`
-	ReleaseDate string      `json:"release_date"`
-	Images      []ImageInfo `json:"images"`
-	Artist      ArtistInfo  `json:"artist"`
+	Id          string      `json:"id" firestore:"id,omitempty"`
+	Name        string      `json:"name" firestore:"name,omitempty"`
+	Url         string      `json:"url" firestore:"url,omitempty"`
+	ReleaseDate string      `json:"release_date" firestore:"release_date,omitempty"`
+	Images      []ImageInfo `json:"images" firestore:"images,omitempty"`
+	Artist      ArtistInfo  `json:"artist" firestore:"artist,omitempty"`
 }
 
 type ImageInfo struct {
-	Height int    `json:"height"`
-	Width  int    `json:"width"`
-	Url    string `json:"url"`
+	Height int    `json:"height" firestore:"height,omitempty"`
+	Width  int    `json:"width" firestore:"width,omitempty"`
+	Url    string `json:"url" firestore:"url,omitempty"`
 }
 
 type ArtistInfo struct {
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Url    string `json:"url"`
-	Images []ImageInfo
+	Id     string      `json:"id" firestore:"id,omitempty"`
+	Name   string      `json:"name" firestore:"name,omitempty"`
+	Url    string      `json:"url" firestore:"url,omitempty"`
+	Images []ImageInfo `json:"images" firestore:"images,omitempty"`
 }
 
 func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
-	url := "https://api.kkbox.com/v1.1/tracks/" + songID + "?territory=TW"
-
-	req, _ := http.NewRequest("GET", url, nil)
-	bearerToken := config.Config("KKBOX_OPENAPI_BEARER_TOKEN")
-	req.Header.Add("Authorization", "Bearer "+bearerToken)
-
-	res, err := client.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	reqBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
 	var songInfo SongInfo
-	json.Unmarshal(reqBody, &songInfo)
+
+	ctx := context.Background()
+	fireStoreClient := createClient(ctx)
+	defer fireStoreClient.Close()
+
+	dsnap, err := fireStoreClient.Collection("track").Doc(songID).Get(ctx)
+	if err != nil {
+
+		url := "https://api.kkbox.com/v1.1/tracks/" + songID + "?territory=TW"
+
+		req, _ := http.NewRequest("GET", url, nil)
+		bearerToken := config.Config("KKBOX_OPENAPI_BEARER_TOKEN")
+		req.Header.Add("Authorization", "Bearer "+bearerToken)
+
+		res, err := client.client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer res.Body.Close()
+
+		reqBody, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		json.Unmarshal(reqBody, &songInfo)
+		fireStoreClient.Collection("track").Doc(songID).Set(ctx, &songInfo)
+		if err != nil {
+			log.Fatalf("firestore Doc Create error:%s\n", err)
+		}
+
+		return &songInfo, nil
+	}
+
+	dsnap.DataTo(&songInfo)
 
 	return &songInfo, nil
+}
+
+func createClient(ctx context.Context) *firestore.Client {
+	// Sets your Google Cloud Platform project ID.
+	projectID := "kkchack22-just-have-time"
+
+	client, err := firestore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+
+	return client
 }

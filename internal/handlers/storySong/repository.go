@@ -38,7 +38,7 @@ func (r *repository) List() ([]model.StorySong, error) {
 	var storySong []model.StorySong
 
 	// find all storySong in the database
-	r.db.Preload("Hashtag").Find(&storySong)
+	r.db.Preload("Hashtag").Order("created_at desc").Order("msno").Find(&storySong)
 
 	return storySong, nil
 }

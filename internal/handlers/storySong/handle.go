@@ -32,7 +32,6 @@ type StorySong struct {
 
 func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 	storysMap := make(map[int64]ResponseStoty)
-	var songs []ResponseStorySong
 
 	storySongs, _ := h.repository.List()
 
@@ -54,7 +53,6 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 			SongHashTag: newHastags,
 			CreatedAt:   int(storySong.CreatedAt.Unix()),
 		}
-		songs = append(songs, newResponseStorySong)
 
 		entry, mapExist := storysMap[msno]
 		// If the key exists
@@ -62,6 +60,8 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 			entry.Songs = append(entry.Songs, newResponseStorySong)
 			storysMap[msno] = entry
 		} else {
+			var songs []ResponseStorySong
+			songs = append(songs, newResponseStorySong)
 			storysMap[msno] = ResponseStoty{
 				Msno:         msno,
 				UserHashTags: []string{"Hello", "迷妹日常"},

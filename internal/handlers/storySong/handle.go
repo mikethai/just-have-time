@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
+	userHandler "github.com/mikethai/just-have-time/internal/handlers/user"
 	"github.com/mikethai/just-have-time/internal/model"
 )
 
@@ -87,6 +88,8 @@ func (h *Handler) CreateStorySongs(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
 	}
 
+	checkUserExists(storySong.Msno)
+
 	newStorySongModel := model.StorySong{
 		SongID: storySong.SongID,
 		Msno:   storySong.Msno,
@@ -121,4 +124,9 @@ func (h *Handler) GetStorySong(c *fiber.Ctx) error {
 
 func (h *Handler) UpdateStorySong(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "success", "message": "Story Song Updated", "data": ""})
+}
+
+func checkUserExists(msno int64) {
+	newsUserHandler := userHandler.NewHandler()
+	newsUserHandler.CreateUser(msno)
 }

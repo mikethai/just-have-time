@@ -52,3 +52,10 @@ func (h *Handler) CreateUserFollow(c *fiber.Ctx) error {
 	// Return the user follow
 	return c.JSON(fiber.Map{"status": "success", "message": "Created Follow", "data": userFollow})
 }
+
+func (h *Handler) CreateUser(msno int64) {
+	user := &CreateUserParameter{
+		Msno: msno,
+	}
+	h.repository.Create(user)
+}

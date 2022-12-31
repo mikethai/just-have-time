@@ -1,6 +1,9 @@
 package storySongHandler
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/mikethai/just-have-time/internal/model"
 
 	"gorm.io/gorm"
@@ -38,7 +41,11 @@ func (r *repository) List() ([]model.StorySong, error) {
 	var storySong []model.StorySong
 
 	// find all storySong in the database
-	r.db.Preload("Hashtag").Order("created_at desc").Order("msno").Find(&storySong)
+	currentTime := time.Now()
+	daysAgo := currentTime.Add(-time.Hour * 24)
+
+	fmt.Print(daysAgo.Format(time.RFC3339))
+	r.db.Preload("Hashtag").Where("created_at > ?", daysAgo.Format(time.RFC3339)).Order("created_at desc").Order("msno").Find(&storySong)
 
 	return storySong, nil
 }

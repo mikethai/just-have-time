@@ -1,14 +1,12 @@
 package storySongHandler
 
 import (
-	"context"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 
-	"cloud.google.com/go/firestore"
 	"github.com/mikethai/just-have-time/config"
+	firestoreCache "github.com/mikethai/just-have-time/internal/firestoreClient"
 )
 
 type HttpClient interface {
@@ -59,11 +57,7 @@ type ArtistInfo struct {
 func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
 	var songInfo SongInfo
 
-	ctx := context.Background()
-	fireStoreClient := createClient(ctx)
-	defer fireStoreClient.Close()
-
-	dsnap, err := fireStoreClient.Collection("track").Doc(songID).Get(ctx)
+	dsnap, err := firestoreCache.Get("track", songID)
 	if err != nil {
 
 		url := "https://api.kkbox.com/v1.1/tracks/" + songID + "?territory=TW"
@@ -84,10 +78,8 @@ func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
 		}
 
 		json.Unmarshal(reqBody, &songInfo)
-		fireStoreClient.Collection("track").Doc(songID).Set(ctx, &songInfo)
-		if err != nil {
-			log.Fatalf("firestore Doc Create error:%s\n", err)
-		}
+
+		firestoreCache.Set("track", songID, &songInfo)
 
 		return &songInfo, nil
 	}
@@ -95,16 +87,4 @@ func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
 	dsnap.DataTo(&songInfo)
 
 	return &songInfo, nil
-}
-
-func createClient(ctx context.Context) *firestore.Client {
-	// Sets your Google Cloud Platform project ID.
-	projectID := "kkchack22-just-have-time"
-
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-	}
-
-	return client
 }

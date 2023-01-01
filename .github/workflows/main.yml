@@ -1,0 +1,50 @@
+name: Build and Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+    - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  SERVICE_NAME: just-have-time
+  RUN_REGION: asia-east1
+  CONNECTION_NAME: kkchack22-just-have-time:asia-east1:postgres-just-have-time-dev
+
+jobs:
+  setup-build-deploy:
+    name: Setup, Build, and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Setup gcloud CLI
+    - uses: 'google-github-actions/auth@v1'
+      with:
+        service_account: ${{ secrets.GCP_SA_EMAIL }}
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    # Print gcloud info
+    - name: Info
+      run: gcloud info
+
+    # Build and push image to Google Container Registry
+    - name: Build
+      run: |-
+        gcloud builds submit \
+          --quiet \
+          --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
+          --project $PROJECT_ID
+    # Deploy image to Cloud Run
+    - name: Deploy
+      run: |-
+        gcloud run deploy "$SERVICE_NAME" \
+          --quiet \
+          --region "$RUN_REGION" \
+          --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
+          --platform "managed" \
+          --add-cloudsql-instances $CONNECTION_NAME \
+          --allow-unauthenticated

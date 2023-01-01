@@ -3,6 +3,8 @@ module github.com/mikethai/just-have-time
 go 1.19
 
 require (
+	cloud.google.com/go/firestore v1.9.0
+	github.com/GoogleCloudPlatform/cloudsql-proxy v1.33.1
 	github.com/gofiber/fiber/v2 v2.40.1
 	github.com/joho/godotenv v1.4.0
 	gorm.io/driver/postgres v1.4.5
@@ -13,9 +15,7 @@ require (
 	cloud.google.com/go v0.105.0 // indirect
 	cloud.google.com/go/compute v1.12.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.1 // indirect
-	cloud.google.com/go/firestore v1.9.0 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
-	github.com/GoogleCloudPlatform/cloudsql-proxy v1.33.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect

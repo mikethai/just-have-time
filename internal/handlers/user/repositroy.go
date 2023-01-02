@@ -29,6 +29,10 @@ type CreateUserParameter struct {
 	Msno int64
 }
 
+type User struct {
+	Msno int64
+}
+
 func (r *repository) Create(param *CreateUserParameter) (*model.User, error) {
 
 	newUser := model.User{

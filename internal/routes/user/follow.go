@@ -12,4 +12,6 @@ func SetupUserRoutes(router fiber.Router) {
 
 	// Create a follow record
 	storySong.Post("/", newsUserHandler.CreateUserFollow)
+
+	storySong.Post("/sync", newsUserHandler.SyncUserFollow)
 }

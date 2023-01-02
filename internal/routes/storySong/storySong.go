@@ -8,14 +8,16 @@ import (
 func SetupStorySongRoutes(router fiber.Router) {
 
 	newstorySongHandler := storySongHandler.NewHandler()
-	storySong := router.Group("/story-song")
+
+	// Read all story songs
+	router.Get("/story-cards", newstorySongHandler.GetStorySongs)
 
 	// Create a story song
-	storySong.Post("/", newstorySongHandler.CreateStorySongs)
-	// Read all story songs
-	storySong.Get("/", newstorySongHandler.GetStorySongs)
+	router.Post("/story-card", newstorySongHandler.CreateStorySongs)
+
+	// storySong := router.Group("/story-card")
 	// Read one story song
-	storySong.Get("/:storySongId", newstorySongHandler.GetStorySong)
+	// storySong.Get("/:storySongId", newstorySongHandler.GetStorySong)
 	// Update one story song
-	storySong.Put("/:storySongId", newstorySongHandler.UpdateStorySong)
+	// storySong.Put("/:storySongId", newstorySongHandler.UpdateStorySong)
 }

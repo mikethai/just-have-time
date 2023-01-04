@@ -1,15 +1,17 @@
 package storySongHandler
 
 type ResponseStorySong struct {
-	SongID      string   `json:"songId"`
-	SongName    string   `json:"songName"`
-	Artist      string   `json:"artist"`
-	SongHashTag []string `json:"songHashTags"`
-	CreatedAt   int      `json:"createdAt"`
+	SongID         string   `json:"songId"`
+	SongName       string   `json:"songName"`
+	SongAlbumImage string   `json:"songAlbumImage"`
+	Artist         string   `json:"artist"`
+	SongHashTag    []string `json:"songHashTags"`
+	CreatedAt      int      `json:"createdAt"`
 }
 
 type ResponseStoty struct {
 	Msno         int64               `json:"msno"`
+	UserImage    string              `json:"userImage"`
 	UserHashTags []string            `json:"userHashTags"`
 	Songs        []ResponseStorySong `json:"songs"`
 }

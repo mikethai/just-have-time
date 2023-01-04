@@ -2,6 +2,7 @@ package storySongHandler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
@@ -25,9 +26,10 @@ func NewHandler() *Handler {
 }
 
 type StorySong struct {
-	SongID   string
-	Msno     int64
-	Hashtags []string
+	SongID    string
+	Msno      int64
+	UserImage string
+	Hashtags  []string
 }
 
 func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
@@ -47,11 +49,12 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 		}
 
 		newResponseStorySong := ResponseStorySong{
-			SongID:      songID,
-			SongName:    songInfo.Name,
-			Artist:      songInfo.Album.Artist.Name,
-			SongHashTag: newHastags,
-			CreatedAt:   int(storySong.CreatedAt.Unix()),
+			SongID:         songID,
+			SongName:       songInfo.Name,
+			SongAlbumImage: songInfo.Album.Images[1].Url,
+			Artist:         songInfo.Album.Artist.Name,
+			SongHashTag:    newHastags,
+			CreatedAt:      int(storySong.CreatedAt.Unix()),
 		}
 
 		entry, mapExist := storysMap[msno]
@@ -64,6 +67,7 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 			songs = append(songs, newResponseStorySong)
 			storysMap[msno] = ResponseStoty{
 				Msno:         msno,
+				UserImage:    "https://i.kfs.io/muser/global/" + strconv.FormatInt(msno, 10) + "/cropresize/300x300.jpg",
 				UserHashTags: []string{"Hello", "迷妹日常"},
 				Songs:        songs,
 			}

@@ -73,7 +73,13 @@ func (r *repository) CreateHashTag(param *CreateHashTagParameter) (*model.StoryS
 		if err := r.db.Where("name = ?", hashTagName).First(&hashTag).Error; err != nil {
 			hashTag = model.Hashtag{Name: hashTagName}
 			r.db.Create(&hashTag)
+		} else {
+			// Increment Counter
+			if err := r.db.Model(&hashTag).Update("count", hashTag.Count+1).Error; err != nil {
+				return nil, err
+			}
 		}
+
 		r.db.Model(&param.storySongModel).Association("Hashtag").Append(&hashTag)
 	}
 

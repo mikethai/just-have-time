@@ -30,7 +30,7 @@ type Hashtag struct {
 	gorm.Model             // Adds some metadata fields to the table
 	Name       string      `gorm:"index:tag_name_count" json:"Value"`
 	StorySong  []StorySong `gorm:"many2many:storysong_tag;foreignKey:id;"`
-	Count      uint64      `gorm:"index:tag_name_count"`
+	Count      uint64      `gorm:"index:tag_name_count;default:1;not null"`
 }
 
 type StorySong struct {

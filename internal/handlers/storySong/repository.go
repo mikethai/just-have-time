@@ -27,7 +27,7 @@ func NewRepository(db *gorm.DB) *repository {
 
 type CreateParameter struct {
 	SongID  string
-	Msno    int64
+	Msno    string
 	Hashtag []model.Hashtag
 }
 

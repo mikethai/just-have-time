@@ -10,13 +10,13 @@ type ResponseStorySong struct {
 }
 
 type ResponseStoty struct {
-	Msno         int64               `json:"msno"`
+	Msno         string              `json:"msno"`
 	UserImage    string              `json:"userImage"`
 	UserHashTags []string            `json:"userHashTags"`
 	Songs        []ResponseStorySong `json:"songs"`
 }
 
-func getStorysAsSlice(storyMap map[int64]ResponseStoty) []ResponseStoty {
+func getStorysAsSlice(storyMap map[string]ResponseStoty) []ResponseStoty {
 	// Defines the Slice length to match the Map elements count
 	sm := make([]ResponseStoty, len(storyMap))
 

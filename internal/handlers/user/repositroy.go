@@ -8,6 +8,7 @@ import (
 
 type Repository interface {
 	Create(param *CreateUserParameter) (*model.User, error)
+	Fetch(param *FetchUserParameter) (*model.User, error)
 	Follow(param *FollowParameter) (*model.Follow, error)
 }
 
@@ -21,26 +22,45 @@ func NewRepository(db *gorm.DB) *repository {
 	}
 }
 
+type CreateUserParameter struct {
+	Msno    string
+	MsnoInt int64
+}
+
+type FetchUserParameter struct {
+	Msno string
+}
+
 type FollowParameter struct {
 	followModel model.Follow
 }
 
-type CreateUserParameter struct {
-	Msno int64
-}
-
 type User struct {
-	Msno int64
+	Msno string
 }
 
 func (r *repository) Create(param *CreateUserParameter) (*model.User, error) {
+
+	newUser := model.User{
+		Msno:    param.Msno,
+		MsnoInt: param.MsnoInt,
+	}
+
+	if err := r.db.Where("msno = ?", newUser.Msno).First(&newUser).Error; err != nil {
+		r.db.Create(&newUser)
+	}
+
+	return &newUser, nil
+}
+
+func (r *repository) Fetch(param *FetchUserParameter) (*model.User, error) {
 
 	newUser := model.User{
 		Msno: param.Msno,
 	}
 
 	if err := r.db.Where("msno = ?", newUser.Msno).First(&newUser).Error; err != nil {
-		r.db.Create(&newUser)
+		return nil, err
 	}
 
 	return &newUser, nil

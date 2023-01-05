@@ -2,7 +2,6 @@ package storySongHandler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
@@ -27,13 +26,13 @@ func NewHandler() *Handler {
 
 type StorySong struct {
 	SongID    string
-	Msno      int64
+	Msno      string
 	UserImage string
 	Hashtags  []string
 }
 
 func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
-	storysMap := make(map[int64]ResponseStoty)
+	storysMap := make(map[string]ResponseStoty)
 
 	storySongs, _ := h.repository.List()
 
@@ -67,7 +66,7 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 			songs = append(songs, newResponseStorySong)
 			storysMap[msno] = ResponseStoty{
 				Msno:         msno,
-				UserImage:    "https://i.kfs.io/muser/global/" + strconv.FormatInt(msno, 10) + "/cropresize/300x300.jpg",
+				UserImage:    "https://i.kfs.io/muser/global/" + msno + "/cropresize/300x300.jpg",
 				UserHashTags: []string{"Hello", "迷妹日常"},
 				Songs:        songs,
 			}
@@ -92,7 +91,10 @@ func (h *Handler) CreateStorySongs(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
 	}
 
-	checkUserExists(storySong.Msno)
+	isUserExist := checkUserExists(storySong.Msno)
+	if !isUserExist {
+		return c.Status(401).JSON(fiber.Map{"status": "error", "message": "The user not exists."})
+	}
 
 	newStorySongModel := model.StorySong{
 		SongID: storySong.SongID,
@@ -130,7 +132,12 @@ func (h *Handler) UpdateStorySong(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "success", "message": "Story Song Updated", "data": ""})
 }
 
-func checkUserExists(msno int64) {
+func checkUserExists(msno string) bool {
 	newsUserHandler := userHandler.NewHandler()
-	newsUserHandler.CreateUser(msno)
+	_, err := newsUserHandler.FetchUser(msno)
+	if err != nil {
+		return false
+	}
+
+	return true
 }

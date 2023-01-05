@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
 	"github.com/mikethai/just-have-time/internal/model"
@@ -25,8 +26,32 @@ func NewHandler() *Handler {
 }
 
 type UserFollow struct {
-	Follower int64
-	Followee int64
+	Follower string `validate:"required"`
+	Followee string `validate:"required"`
+	SID      string `validate:"required"`
+}
+
+type ErrorResponse struct {
+	FailedField string
+	Tag         string
+	Value       string
+}
+
+var validate = validator.New()
+
+func ValidateStruct(userFollow UserFollow) []*ErrorResponse {
+	var errors []*ErrorResponse
+	err := validate.Struct(userFollow)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
 }
 
 func (h *Handler) CreateUserFollow(c *fiber.Ctx) error {
@@ -36,13 +61,22 @@ func (h *Handler) CreateUserFollow(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
 	}
 
+	errors := ValidateStruct(*userFollow)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+
+	followerMsnoInt, _ := h.httpClient.DecryptMsno(userFollow.Follower, userFollow.SID)
+	followeeMsnoInt, _ := h.httpClient.DecryptMsno(userFollow.Followee, userFollow.SID)
 	followUser := &CreateUserParameter{
-		Msno: userFollow.Follower,
+		Msno:    userFollow.Follower,
+		MsnoInt: *followerMsnoInt,
 	}
 	h.repository.Create(followUser)
 
 	followeeUser := &CreateUserParameter{
-		Msno: userFollow.Followee,
+		Msno:    userFollow.Followee,
+		MsnoInt: *followeeMsnoInt,
 	}
 	h.repository.Create(followeeUser)
 
@@ -63,7 +97,7 @@ func (h *Handler) CreateUserFollow(c *fiber.Ctx) error {
 
 func (h *Handler) SyncUserFollow(c *fiber.Ctx) error {
 	userInfo := new(struct {
-		Msno int64
+		Msno string
 		SID  string
 	})
 
@@ -76,16 +110,20 @@ func (h *Handler) SyncUserFollow(c *fiber.Ctx) error {
 		fmt.Println(err)
 		return c.Status(401).JSON(fiber.Map{"status": "error", "message": "The request has some wrong.", "data": err.Error()})
 	}
-
+	followerMsnoInt, _ := h.httpClient.DecryptMsno(userInfo.Msno, userInfo.SID)
 	followUser := &CreateUserParameter{
-		Msno: userInfo.Msno,
+		Msno:    userInfo.Msno,
+		MsnoInt: *followerMsnoInt,
 	}
 	h.repository.Create(followUser)
 
 	for _, followeeUser := range *followee {
 
+		followeeMsnoInt, _ := h.httpClient.DecryptMsno(followeeUser.Msno, userInfo.SID)
+
 		h.repository.Create(&CreateUserParameter{
-			Msno: followeeUser.Msno,
+			Msno:    followeeUser.Msno,
+			MsnoInt: *followeeMsnoInt,
 		})
 
 		newFollowModel := model.Follow{
@@ -101,9 +139,14 @@ func (h *Handler) SyncUserFollow(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": "success", "message": "Created Follow"})
 }
 
-func (h *Handler) CreateUser(msno int64) {
-	user := &CreateUserParameter{
+func (h *Handler) FetchUser(msno string) (*model.User, error) {
+	user := &FetchUserParameter{
 		Msno: msno,
 	}
-	h.repository.Create(user)
+	userInfo, err := h.repository.Fetch(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return userInfo, nil
 }

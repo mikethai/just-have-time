@@ -11,7 +11,7 @@ import (
 )
 
 type HttpClient interface {
-	GetUserFollowing(msno int64, sid string) (*[]Followee, error)
+	GetUserFollowing(msno string, sid string) (*[]Followee, error)
 	recursiveGetUserFollowing(nextPageURL string, sid string) (*[]Followee, error)
 	EncryptMsno(msno int64, sid string) (*string, error)
 	DecryptMsno(msno string, sid string) (*int64, error)
@@ -44,7 +44,7 @@ type MsnoDecryptResponseData struct {
 }
 
 type Followee struct {
-	Msno int64
+	Msno string
 	Type string
 }
 
@@ -63,16 +63,12 @@ type UserFollowingPaging struct {
 	Next string `json:"next"`
 }
 
-func (client *httpClient) GetUserFollowing(msno int64, sid string) (*[]Followee, error) {
+func (client *httpClient) GetUserFollowing(msno string, sid string) (*[]Followee, error) {
 
 	var followee []Followee
 	userFollowingResponse := new(UserFollowingResponse)
 
-	msnoString, err := client.EncryptMsno(msno, sid)
-	if err != nil {
-		return nil, err
-	}
-	url := "https://api-listen-with.kkbox.com.tw/v3/users/" + *msnoString + "/following"
+	url := "https://api-listen-with.kkbox.com.tw/v3/users/" + msno + "/following"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -102,10 +98,8 @@ func (client *httpClient) GetUserFollowing(msno int64, sid string) (*[]Followee,
 	for _, user := range userFollowingResponse.Data {
 
 		if user.Type == "user" {
-			userID, _ := client.DecryptMsno(user.ID, sid)
-
 			followee = append(followee, Followee{
-				Msno: *userID,
+				Msno: user.ID,
 				Type: user.Type,
 			})
 		}
@@ -155,9 +149,8 @@ func (client *httpClient) recursiveGetUserFollowing(nextPageURL string, sid stri
 		for _, user := range userFollowingResponse.Data {
 
 			if user.Type == "user" {
-				userID, _ := client.DecryptMsno(user.ID, sid)
 				followee = append(followee, Followee{
-					Msno: *userID,
+					Msno: user.ID,
 					Type: user.Type,
 				})
 			}

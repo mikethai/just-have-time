@@ -6,10 +6,10 @@ We create the story card that contains music songs with the tag.
 And those cards are shared by your followers who will talk about their daily story all in the story card by songs.
 
 ## :memo: Build a RESTful API in Go
-Language: Go
-Framwork: Fiber
-Database: Gloud SQL (Postgres),GCP FireStore
-Server: Gloud Run
+- Language: Go.
+- Framwork: Fiber
+- Database: Gloud SQL (Postgres),GCP FireStore
+- Server: Gloud Run ＆ Cloud Scheduler
 
 Find the full article to build this API [here](https://documenter.getpostman.com/view/15733862/2s8Z6u6bDA)
 

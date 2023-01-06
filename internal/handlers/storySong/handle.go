@@ -1,6 +1,7 @@
 package storySongHandler
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
 	userHandler "github.com/mikethai/just-have-time/internal/handlers/user"
@@ -24,10 +25,33 @@ func NewHandler() *Handler {
 }
 
 type StorySong struct {
-	SongID    string
-	Msno      string
+	SongID    string `json:"song_id" validate:"required"`
+	Msno      string `json:"msno" validate:"required"`
 	UserImage string
-	Hashtags  []string
+	Hashtags  []string `json:"hash_tags" validate:"required"`
+}
+
+type ErrorResponse struct {
+	FailedField string
+	Tag         string
+	Value       string
+}
+
+var validate = validator.New()
+
+func ValidateStruct(storySong StorySong) []*ErrorResponse {
+	var errors []*ErrorResponse
+	err := validate.Struct(storySong)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
 }
 
 func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
@@ -93,6 +117,11 @@ func (h *Handler) CreateStorySongs(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&storySong); err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
+	}
+
+	errors := ValidateStruct(*storySong)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
 	isUserExist := checkUserExists(storySong.Msno)

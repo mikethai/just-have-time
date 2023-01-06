@@ -24,4 +24,7 @@ func SetupRoutes(app *fiber.App) {
 
 	// Setup the User Routes
 	userRoutes.SetupUserRoutes(root)
+
+	// Setup the static file
+	app.Static("/", "./public")
 }

@@ -1,12 +1,11 @@
 package storySongHandler
 
 import (
-	"net/http"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
 	userHandler "github.com/mikethai/just-have-time/internal/handlers/user"
 	"github.com/mikethai/just-have-time/internal/model"
+	"net/http"
 )
 
 type Handler struct {
@@ -47,10 +46,15 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 			newHastags = append(newHastags, hashtag.Name)
 		}
 
+		songAlbumImage := ""
+		if len(songInfo.Album.Images) > 1 {
+			songAlbumImage = songInfo.Album.Images[1].Url
+		}
+
 		newResponseStorySong := ResponseStorySong{
 			SongID:         songID,
 			SongName:       songInfo.Name,
-			SongAlbumImage: songInfo.Album.Images[1].Url,
+			SongAlbumImage: songAlbumImage,
 			Artist:         songInfo.Album.Artist.Name,
 			SongHashTag:    newHastags,
 			CreatedAt:      int(storySong.CreatedAt.Unix()),

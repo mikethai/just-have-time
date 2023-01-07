@@ -101,6 +101,10 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 		}
 	}
 
+	if c.Params("filterUser") == "filterUser" {
+		delete(storysMap, c.Params("msno"))
+	}
+
 	storysSlics := getStorysAsSlice(storysMap, c.Params("msno"))
 
 	// If no story song is present return an error

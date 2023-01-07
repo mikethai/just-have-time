@@ -101,7 +101,7 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 		}
 	}
 
-	storysSlics := getStorysAsSlice(storysMap)
+	storysSlics := getStorysAsSlice(storysMap, c.Params("msno"))
 
 	// If no story song is present return an error
 	if len(storysSlics) == 0 {

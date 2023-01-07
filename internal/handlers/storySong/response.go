@@ -16,13 +16,19 @@ type ResponseStoty struct {
 	Songs        []ResponseStorySong `json:"songs"`
 }
 
-func getStorysAsSlice(storyMap map[string]ResponseStoty) []ResponseStoty {
+func getStorysAsSlice(storyMap map[string]ResponseStoty, msno string) []ResponseStoty {
 	// Defines the Slice length to match the Map elements count
 	sm := make([]ResponseStoty, len(storyMap))
 
 	i := 0
 	for _, tx := range storyMap {
-		sm[i] = tx
+		if msno == tx.Msno {
+			sm[i] = sm[0]
+			sm[0] = tx
+		} else {
+			sm[i] = tx
+		}
+
 		i++
 	}
 

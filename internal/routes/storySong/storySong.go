@@ -12,12 +12,10 @@ func SetupStorySongRoutes(router fiber.Router) {
 	// Read all story songs
 	router.Get("/story-cards", newstorySongHandler.GetStorySongs)
 
+	// Read all story songs by msno
+	router.Get("/story-cards/:msno", newstorySongHandler.GetStorySongs)
+
 	// Create a story song
 	router.Post("/story-card", newstorySongHandler.CreateStorySongs)
 
-	// storySong := router.Group("/story-card")
-	// Read one story song
-	// storySong.Get("/:storySongId", newstorySongHandler.GetStorySong)
-	// Update one story song
-	// storySong.Put("/:storySongId", newstorySongHandler.UpdateStorySong)
 }

@@ -11,7 +11,6 @@ type User struct {
 	UserHashTags pgtype.JSONB `gorm:"type:jsonb;default:'[]';not null"`
 	Followers    []User       `gorm:"many2many:follows;association_junction:Follow;foreignKey:msno"`
 	Following    []User       `gorm:"many2many:follows;association_junction:Follow;foreignKey:msno"`
-	StorySong    []StorySong  `gorm:"foreignKey:msno;references:msno;constraint:OnUpdate:CASCADE, OnDelete:CASCADE;"`
 }
 
 type Follow struct {
@@ -39,4 +38,5 @@ type StorySong struct {
 	Msno       string
 	Song       Song      `gorm:"foreignKey:song_id;"`
 	Hashtag    []Hashtag `gorm:"many2many:storysong_tag;foreignKey:id;"`
+	User       User      `gorm:"foreignKey:msno;references:msno;"`
 }

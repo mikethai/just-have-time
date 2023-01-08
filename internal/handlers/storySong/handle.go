@@ -7,6 +7,7 @@ import (
 	userHandler "github.com/mikethai/just-have-time/internal/handlers/user"
 	"github.com/mikethai/just-have-time/internal/model"
 	"net/http"
+	"strconv"
 )
 
 type Handler struct {
@@ -91,11 +92,18 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 			storysMap[msno] = entry
 		} else {
 			var songs []ResponseStorySong
+			var userTags []string
 			songs = append(songs, newResponseStorySong)
+
+			err := storySong.User.UserHashTags.AssignTo(&userTags)
+			if err != nil {
+				return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Could not create story song", "data": err})
+			}
+
 			storysMap[msno] = ResponseStoty{
 				Msno:         msno,
-				UserImage:    "https://i.kfs.io/muser/global/" + msno + "/cropresize/300x300.jpg",
-				UserHashTags: []string{"Hello", "迷妹日常"},
+				UserImage:    "https://i.kfs.io/muser/global/" + strconv.FormatInt(storySong.User.MsnoInt, 10) + "/cropresize/300x300.jpg",
+				UserHashTags: userTags,
 				Songs:        songs,
 			}
 		}
@@ -109,7 +117,7 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 
 	// If no story song is present return an error
 	if len(storysSlics) == 0 {
-		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No story song present", "data": nil})
+		return c.Status(404).JSON(fiber.Map{"status": "error", "message": "No story song present", "data": storysSlics})
 	}
 
 	// Else return story song
@@ -151,14 +159,14 @@ func (h *Handler) CreateStorySongs(c *fiber.Ctx) error {
 		Hashtag: storySongModel.Hashtag,
 	}
 
-	newStorySong, err := h.repository.Create(storySongParameter)
+	_, err = h.repository.Create(storySongParameter)
 
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Could not create story song", "data": err})
 	}
 
 	// Return the created story song
-	return c.JSON(fiber.Map{"status": "success", "message": "Created Story song", "data": newStorySong})
+	return c.JSON(fiber.Map{"status": "success", "message": "Created Story song"})
 }
 
 func (h *Handler) GetStorySong(c *fiber.Ctx) error {

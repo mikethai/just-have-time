@@ -12,6 +12,7 @@ type ResponseStorySong struct {
 type ResponseStoty struct {
 	Msno         string              `json:"msno"`
 	UserImage    string              `json:"userImage"`
+	UserName     string              `json:"userName"`
 	UserHashTags []string            `json:"userHashTags"`
 	Songs        []ResponseStorySong `json:"songs"`
 }

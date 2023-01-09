@@ -8,6 +8,7 @@ import (
 type User struct {
 	Msno         string `gorm:"primaryKey;unique"`
 	MsnoInt      int64
+	UserName     string
 	UserHashTags pgtype.JSONB `gorm:"type:jsonb;default:'[]';not null"`
 	Followers    []User       `gorm:"many2many:follows;association_junction:Follow;foreignKey:msno"`
 	Following    []User       `gorm:"many2many:follows;association_junction:Follow;foreignKey:msno"`

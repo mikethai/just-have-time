@@ -23,8 +23,9 @@ func NewRepository(db *gorm.DB) *repository {
 }
 
 type CreateUserParameter struct {
-	Msno    string
-	MsnoInt int64
+	Msno     string
+	MsnoInt  int64
+	UserName string
 }
 
 type FetchUserParameter struct {
@@ -42,8 +43,9 @@ type User struct {
 func (r *repository) Create(param *CreateUserParameter) (*model.User, error) {
 
 	newUser := model.User{
-		Msno:    param.Msno,
-		MsnoInt: param.MsnoInt,
+		Msno:     param.Msno,
+		MsnoInt:  param.MsnoInt,
+		UserName: param.UserName,
 	}
 
 	if err := r.db.Where("msno = ?", newUser.Msno).First(&newUser).Error; err != nil {

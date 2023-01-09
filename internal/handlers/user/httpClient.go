@@ -12,6 +12,7 @@ import (
 
 type HttpClient interface {
 	GetUserFollowing(msno string, sid string) (*[]Followee, error)
+	GetUserProfile(msno string, sid string) (*UserProfileData, error)
 	recursiveGetUserFollowing(nextPageURL string, sid string) (*[]Followee, error)
 	EncryptMsno(msno int64, sid string) (*string, error)
 	DecryptMsno(msno string, sid string) (*int64, error)
@@ -45,6 +46,7 @@ type MsnoDecryptResponseData struct {
 
 type Followee struct {
 	Msno string
+	Name string
 	Type string
 }
 
@@ -61,6 +63,15 @@ type UserFollowingData struct {
 
 type UserFollowingPaging struct {
 	Next string `json:"next"`
+}
+
+type UserProfileResponse struct {
+	Data UserProfileData `json:"data"`
+}
+
+type UserProfileData struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func (client *httpClient) GetUserFollowing(msno string, sid string) (*[]Followee, error) {
@@ -100,6 +111,7 @@ func (client *httpClient) GetUserFollowing(msno string, sid string) (*[]Followee
 		if user.Type == "user" {
 			followee = append(followee, Followee{
 				Msno: user.ID,
+				Name: user.Name,
 				Type: user.Type,
 			})
 		}
@@ -115,6 +127,40 @@ func (client *httpClient) GetUserFollowing(msno string, sid string) (*[]Followee
 	}
 
 	return &followee, nil
+}
+
+func (client *httpClient) GetUserProfile(msno string, sid string) (*UserProfileData, error) {
+
+	userProfileResponse := new(UserProfileResponse)
+
+	url := "https://api-listen-with.kkbox.com.tw/v3/users/" + msno
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", sid)
+
+	res, err := client.client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return nil, errors.New("User API return HTTP Status : " + http.StatusText(res.StatusCode))
+	}
+
+	reqBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	json.Unmarshal(reqBody, &userProfileResponse)
+
+	return &userProfileResponse.Data, nil
 }
 
 func (client *httpClient) recursiveGetUserFollowing(nextPageURL string, sid string) (*[]Followee, error) {

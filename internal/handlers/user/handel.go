@@ -57,22 +57,27 @@ func ValidateStruct(userFollow UserFollow) []*ErrorResponse {
 func (h *Handler) SyncUserFollow(c *fiber.Ctx) error {
 	userInfo := new(struct {
 		Msno string
+		Name string
 		SID  string
 	})
 
 	if err := c.BodyParser(&userInfo); err != nil {
 		return c.Status(503).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
 	}
+	userProfile, err := h.httpClient.GetUserProfile(userInfo.Msno, userInfo.SID)
+	if err != nil {
+		return c.Status(401).JSON(fiber.Map{"status": "error", "message": "The request has some wrong.", "data": err.Error()})
+	}
 
 	followee, err := h.httpClient.GetUserFollowing(userInfo.Msno, userInfo.SID)
 	if err != nil {
-		fmt.Println(err)
 		return c.Status(401).JSON(fiber.Map{"status": "error", "message": "The request has some wrong.", "data": err.Error()})
 	}
 	followerMsnoInt, _ := h.httpClient.DecryptMsno(userInfo.Msno, userInfo.SID)
 	followUser := &CreateUserParameter{
-		Msno:    userInfo.Msno,
-		MsnoInt: *followerMsnoInt,
+		Msno:     userInfo.Msno,
+		MsnoInt:  *followerMsnoInt,
+		UserName: userProfile.Name,
 	}
 	h.repository.Create(followUser)
 
@@ -81,8 +86,9 @@ func (h *Handler) SyncUserFollow(c *fiber.Ctx) error {
 		followeeMsnoInt, _ := h.httpClient.DecryptMsno(followeeUser.Msno, userInfo.SID)
 
 		h.repository.Create(&CreateUserParameter{
-			Msno:    followeeUser.Msno,
-			MsnoInt: *followeeMsnoInt,
+			Msno:     followeeUser.Msno,
+			MsnoInt:  *followeeMsnoInt,
+			UserName: followeeUser.Name,
 		})
 
 		newFollowModel := model.Follow{

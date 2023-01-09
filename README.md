@@ -26,6 +26,7 @@ Find the full article to build this API [here](https://documenter.getpostman.com
 - https://api.kkbox.com/v1.1/charts
 - https://api.kkbox.com/v1.1/search
 - https://api.kkbox.com/v1.1/tracks
+- https://api-listen-with.kkbox.com.tw/v3/users
 - https://api-listen-with.kkbox.com.tw/v3/users/{{userID}}/following
 - https://api-listen-with.kkbox.com.tw/v3/encrypt
 - https://api-listen-with.kkbox.com.tw/v3/decrypt

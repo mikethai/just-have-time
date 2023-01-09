@@ -54,47 +54,6 @@ func ValidateStruct(userFollow UserFollow) []*ErrorResponse {
 	return errors
 }
 
-func (h *Handler) CreateUserFollow(c *fiber.Ctx) error {
-	userFollow := new(UserFollow)
-
-	if err := c.BodyParser(&userFollow); err != nil {
-		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Review your input", "data": err})
-	}
-
-	errors := ValidateStruct(*userFollow)
-	if errors != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(errors)
-	}
-
-	followerMsnoInt, _ := h.httpClient.DecryptMsno(userFollow.Follower, userFollow.SID)
-	followeeMsnoInt, _ := h.httpClient.DecryptMsno(userFollow.Followee, userFollow.SID)
-	followUser := &CreateUserParameter{
-		Msno:    userFollow.Follower,
-		MsnoInt: *followerMsnoInt,
-	}
-	h.repository.Create(followUser)
-
-	followeeUser := &CreateUserParameter{
-		Msno:    userFollow.Followee,
-		MsnoInt: *followeeMsnoInt,
-	}
-	h.repository.Create(followeeUser)
-
-	newFollowModel := model.Follow{
-		FollowerID: userFollow.Follower,
-		FolloweeID: userFollow.Followee,
-	}
-
-	followParameter := &FollowParameter{
-		followModel: newFollowModel,
-	}
-
-	h.repository.Follow(followParameter)
-
-	// Return the user follow
-	return c.JSON(fiber.Map{"status": "success", "message": "Created Follow", "data": userFollow})
-}
-
 func (h *Handler) SyncUserFollow(c *fiber.Ctx) error {
 	userInfo := new(struct {
 		Msno string

@@ -4,6 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
+	"github.com/mikethai/just-have-time/internal/firestoreClient"
 	userHandler "github.com/mikethai/just-have-time/internal/handlers/user"
 	"github.com/mikethai/just-have-time/internal/model"
 	"net/http"
@@ -61,13 +62,23 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 	storysMap := make(map[string]ResponseStoty)
 
 	storySongs, _ := h.repository.List()
+	firestoreCache := firestoreClient.NewFirestoreClient()
+	defer firestoreCache.CloseConnection()
 
 	for _, storySong := range storySongs {
 		var newHastags []string
+		var songInfo *SongInfo
 
 		songID := storySong.SongID
 		msno := storySong.Msno
-		songInfo, _ := h.httpClient.GetSongInfo(songID)
+
+		dsnap, err := firestoreCache.Get("track", songID)
+		if err != nil {
+			songInfo, _ = h.httpClient.GetSongInfo(songID)
+			firestoreCache.Set("track", songID, &songInfo)
+		} else {
+			dsnap.DataTo(&songInfo)
+		}
 
 		for _, hashtag := range storySong.Hashtag {
 			newHastags = append(newHastags, hashtag.Name)

@@ -9,6 +9,12 @@ import (
 
 const gcpProjectID = "kkchack22-just-have-time"
 
+type FirestoreClient interface {
+	Get(collection string, docID string) (*firestore.DocumentSnapshot, error)
+	Set(collection string, docID string, anyStructure any)
+	CloseConnection()
+}
+
 type firestoreClient struct {
 	client  *firestore.Client
 	context context.Context

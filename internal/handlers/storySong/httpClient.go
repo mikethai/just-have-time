@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/mikethai/just-have-time/config"
-	"github.com/mikethai/just-have-time/internal/firestoreClient"
 )
 
 const authHeaderField = "Authorization"
@@ -60,35 +59,23 @@ type ArtistInfo struct {
 func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
 	var songInfo SongInfo
 
-	firestoreCache := firestoreClient.NewFirestoreClient()
-	defer firestoreCache.CloseConnection()
-	dsnap, err := firestoreCache.Get("track", songID)
+	url := openApiUrl + "tracks/" + songID + "?territory=TW"
+	req, _ := http.NewRequest("GET", url, nil)
+	bearerToken := config.Config("KKBOX_OPENAPI_BEARER_TOKEN")
+	req.Header.Add(authHeaderField, "Bearer "+bearerToken)
+
+	res, err := client.client.Do(req)
 	if err != nil {
-		url := openApiUrl + "/tracks/" + songID + "?territory=TW"
+		return nil, err
+	}
+	defer res.Body.Close()
 
-		req, _ := http.NewRequest("GET", url, nil)
-		bearerToken := config.Config("KKBOX_OPENAPI_BEARER_TOKEN")
-		req.Header.Add(authHeaderField, "Bearer "+bearerToken)
-
-		res, err := client.client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		defer res.Body.Close()
-
-		reqBody, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		json.Unmarshal(reqBody, &songInfo)
-
-		firestoreCache.Set("track", songID, &songInfo)
-
-		return &songInfo, nil
+	reqBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
 	}
 
-	dsnap.DataTo(&songInfo)
+	json.Unmarshal(reqBody, &songInfo)
 
 	return &songInfo, nil
 }

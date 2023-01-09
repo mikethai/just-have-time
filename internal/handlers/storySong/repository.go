@@ -43,7 +43,7 @@ func (r *repository) List() ([]model.StorySong, error) {
 	currentTime := time.Now()
 	daysAgo := currentTime.Add(-time.Hour * 24)
 
-	r.db.Model(&storySong).Preload("Hashtag").Joins("User").Where("created_at > ?", daysAgo.Format(time.RFC3339)).Order("created_at desc").Order("msno").Find(&storySong)
+	r.db.Model(&storySong).Preload("Hashtag").Joins("User").Where("created_at > ?", daysAgo.Format(time.RFC3339)).Order("created_at desc").Find(&storySong)
 
 	return storySong, nil
 }

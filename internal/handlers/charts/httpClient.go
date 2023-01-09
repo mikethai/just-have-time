@@ -8,6 +8,10 @@ import (
 	"github.com/mikethai/just-have-time/config"
 )
 
+const authHeaderField = "Authorization"
+const openApiUrl = "https://api.kkbox.com/v1.1/"
+const chartPlaylistId = "LZPhK2EyYzN15dU-PT"
+
 type HttpClient interface {
 	GetSongCharts() (*TrackChartsResult, error)
 }
@@ -62,11 +66,11 @@ type ArtistInfo struct {
 }
 
 func (client *httpClient) GetSongCharts() (*TrackChartsResult, error) {
-	url := "https://api.kkbox.com/v1.1/charts/LZPhK2EyYzN15dU-PT?territory=TW"
+	url := openApiUrl + "charts/" + chartPlaylistId + "?territory=TW"
 
 	req, _ := http.NewRequest("GET", url, nil)
 	bearerToken := config.Config("KKBOX_OPENAPI_BEARER_TOKEN")
-	req.Header.Add("Authorization", "Bearer "+bearerToken)
+	req.Header.Add(authHeaderField, "Bearer "+bearerToken)
 
 	res, err := client.client.Do(req)
 	if err != nil {

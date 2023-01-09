@@ -9,6 +9,9 @@ import (
 	"github.com/mikethai/just-have-time/internal/firestoreClient"
 )
 
+const authHeaderField = "Authorization"
+const openApiUrl = "https://api.kkbox.com/v1.1/"
+
 type HttpClient interface {
 	GetSongInfo(songID string) (*SongInfo, error)
 }
@@ -61,11 +64,11 @@ func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
 	dsnap, err := firestoreCache.Get("track", songID)
 	if err != nil {
 
-		url := "https://api.kkbox.com/v1.1/tracks/" + songID + "?territory=TW"
+		url := openApiUrl + "/tracks/" + songID + "?territory=TW"
 
 		req, _ := http.NewRequest("GET", url, nil)
 		bearerToken := config.Config("KKBOX_OPENAPI_BEARER_TOKEN")
-		req.Header.Add("Authorization", "Bearer "+bearerToken)
+		req.Header.Add(authHeaderField, "Bearer "+bearerToken)
 
 		res, err := client.client.Do(req)
 		if err != nil {

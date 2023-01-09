@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+const authHeaderField = "Authorization"
+const openApiUrl = "https://api.kkbox.com/v1.1/"
+const listenWithApiUrl = "https://api-listen-with.kkbox.com.tw/v3/"
+
 type HttpClient interface {
 	GetUserFollowing(msno string, sid string) (*[]Followee, error)
 	GetUserProfile(msno string, sid string) (*UserProfileData, error)
@@ -79,7 +83,7 @@ func (client *httpClient) GetUserFollowing(msno string, sid string) (*[]Followee
 	var followee []Followee
 	userFollowingResponse := new(UserFollowingResponse)
 
-	url := "https://api-listen-with.kkbox.com.tw/v3/users/" + msno + "/following"
+	url := listenWithApiUrl + "users/" + msno + "/following"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -133,14 +137,14 @@ func (client *httpClient) GetUserProfile(msno string, sid string) (*UserProfileD
 
 	userProfileResponse := new(UserProfileResponse)
 
-	url := "https://api-listen-with.kkbox.com.tw/v3/users/" + msno
+	url := listenWithApiUrl + "users/" + msno
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", sid)
+	req.Header.Add(authHeaderField, sid)
 
 	res, err := client.client.Do(req)
 	if err != nil {
@@ -172,7 +176,7 @@ func (client *httpClient) recursiveGetUserFollowing(nextPageURL string, sid stri
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", sid)
+	req.Header.Add(authHeaderField, sid)
 
 	res, err := client.client.Do(req)
 	if err != nil {
@@ -212,7 +216,7 @@ func (client *httpClient) recursiveGetUserFollowing(nextPageURL string, sid stri
 func (client *httpClient) EncryptMsno(msno int64, sid string) (*string, error) {
 
 	msnoEncrpytResponse := new(MsnoEncrpytResponse)
-	url := "https://api-listen-with.kkbox.com.tw/v3/encrypt"
+	url := listenWithApiUrl + "encrypt"
 	method := "POST"
 
 	payload := strings.NewReader(`{
@@ -225,7 +229,7 @@ func (client *httpClient) EncryptMsno(msno int64, sid string) (*string, error) {
 		return nil, err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", sid)
+	req.Header.Add(authHeaderField, sid)
 
 	res, err := client.client.Do(req)
 	if err != nil {
@@ -250,7 +254,7 @@ func (client *httpClient) EncryptMsno(msno int64, sid string) (*string, error) {
 func (client *httpClient) DecryptMsno(msno string, sid string) (*int64, error) {
 
 	msnoDecryptResponse := new(MsnoDecryptResponse)
-	url := "https://api-listen-with.kkbox.com.tw/v3/decrypt"
+	url := listenWithApiUrl + "decrypt"
 	method := "POST"
 
 	payload := strings.NewReader(`{

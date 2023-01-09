@@ -8,6 +8,9 @@ import (
 	"github.com/mikethai/just-have-time/config"
 )
 
+const authHeaderField = "Authorization"
+const openApiUrl = "https://api.kkbox.com/v1.1/"
+
 type HttpClient interface {
 	GetSearchSong(keyWord string) (*TrackSearchResult, error)
 }
@@ -62,11 +65,11 @@ type ArtistInfo struct {
 }
 
 func (client *httpClient) GetSearchSong(keyWord string) (*TrackSearchResult, error) {
-	url := "https://api.kkbox.com/v1.1/search?q=" + keyWord + "&territory=TW&type=track&limit=50"
+	url := openApiUrl + "v1.1/search?q=" + keyWord + "&territory=TW&type=track&limit=50"
 
 	req, _ := http.NewRequest("GET", url, nil)
 	bearerToken := config.Config("KKBOX_OPENAPI_BEARER_TOKEN")
-	req.Header.Add("Authorization", "Bearer "+bearerToken)
+	req.Header.Add(authHeaderField, "Bearer "+bearerToken)
 
 	res, err := client.client.Do(req)
 	if err != nil {

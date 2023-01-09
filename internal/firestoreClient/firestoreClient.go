@@ -7,6 +7,8 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
+const gcpProjectID = "kkchack22-just-have-time"
+
 type firestoreClient struct {
 	client  *firestore.Client
 	context context.Context
@@ -14,7 +16,7 @@ type firestoreClient struct {
 
 func NewFirestoreClient() *firestoreClient {
 	// Sets your Google Cloud Platform project ID.
-	projectID := "kkchack22-just-have-time"
+	projectID := gcpProjectID
 
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectID)

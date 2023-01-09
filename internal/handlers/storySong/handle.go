@@ -10,6 +10,8 @@ import (
 	"strconv"
 )
 
+const kkImageUrl = "https://i.kfs.io/muser/global/"
+
 type Handler struct {
 	repository Repository
 	httpClient HttpClient
@@ -102,7 +104,7 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 
 			storysMap[msno] = ResponseStoty{
 				Msno:         msno,
-				UserImage:    "https://i.kfs.io/muser/global/" + strconv.FormatInt(storySong.User.MsnoInt, 10) + "/cropresize/300x300.jpg",
+				UserImage:    kkImageUrl + strconv.FormatInt(storySong.User.MsnoInt, 10) + "/cropresize/300x300.jpg",
 				UserName:     storySong.User.UserName,
 				UserHashTags: userTags,
 				Songs:        songs,

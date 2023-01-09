@@ -23,7 +23,7 @@ func getStorysAsSlice(storyMap map[string]ResponseStoty, msno string) []Response
 	i := 0
 	for _, tx := range storyMap {
 		if msno == tx.Msno {
-			sm[i] = sm[0]
+			copy(sm[1:], sm)
 			sm[0] = tx
 		} else {
 			sm[i] = tx

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/mikethai/just-have-time/config"
-	firestoreCache "github.com/mikethai/just-have-time/internal/firestoreClient"
+	"github.com/mikethai/just-have-time/internal/firestoreClient"
 )
 
 type HttpClient interface {
@@ -57,6 +57,7 @@ type ArtistInfo struct {
 func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
 	var songInfo SongInfo
 
+	firestoreCache := firestoreClient.NewFirestoreClient()
 	dsnap, err := firestoreCache.Get("track", songID)
 	if err != nil {
 

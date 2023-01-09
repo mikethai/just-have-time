@@ -19,5 +19,5 @@ func NewHandler() *Handler {
 func (h *Handler) GetSongCharts(c *fiber.Ctx) error {
 
 	result, _ := h.httpClient.GetSongCharts()
-	return c.JSON(fiber.Map{"status": "success", "message": "Story Song Found", "data": result.Tracks.Data})
+	return c.JSON(fiber.Map{"status": "success", "message": "Story Song Found", "data": result.Tracks.Data[:20]})
 }

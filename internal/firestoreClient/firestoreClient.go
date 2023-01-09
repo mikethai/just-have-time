@@ -23,7 +23,6 @@ func NewFirestoreClient() *firestoreClient {
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
-	defer client.Close()
 
 	return &firestoreClient{
 		client:  client,
@@ -39,4 +38,8 @@ func (firestoreClient *firestoreClient) Get(collection string, docID string) (*f
 
 func (firestoreClient *firestoreClient) Set(collection string, docID string, anyStructure any) {
 	firestoreClient.client.Collection(collection).Doc(docID).Set(firestoreClient.context, anyStructure)
+}
+
+func (firestoreClient *firestoreClient) CloseConnection() {
+	firestoreClient.client.Close()
 }

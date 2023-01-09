@@ -61,9 +61,9 @@ func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
 	var songInfo SongInfo
 
 	firestoreCache := firestoreClient.NewFirestoreClient()
+	defer firestoreCache.CloseConnection()
 	dsnap, err := firestoreCache.Get("track", songID)
 	if err != nil {
-
 		url := openApiUrl + "/tracks/" + songID + "?territory=TW"
 
 		req, _ := http.NewRequest("GET", url, nil)

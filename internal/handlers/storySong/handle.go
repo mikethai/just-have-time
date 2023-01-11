@@ -64,30 +64,23 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 	storysMap := make(map[string]ResponseStoty)
 
 	storySongs, _ := h.repository.List()
-
-	songIDs := []string{}
-	for _, storySong := range storySongs {
-		songIDs = append(songIDs, storySong.SongID)
-	}
-
 	firestoreCache := firestoreClient.NewFirestoreClient()
 	defer firestoreCache.CloseConnection()
 
-	songInfos := make(map[string]*model.SongInfo)
-	songInfos, _ = firestoreCache.BatchGETSontInfo(songIDs)
-
 	for _, storySong := range storySongs {
 		var newHastags []string
-		var songInfo *model.SongInfo
+		var songInfo *SongInfo
 
 		jid := storySong.ID
 		songID := storySong.SongID
 		msno := storySong.Msno
 
-		songInfo, mapExist := songInfos[songID]
-		if !mapExist {
+		dsnap, err := firestoreCache.Get("track", songID)
+		if err != nil {
 			songInfo, _ = h.httpClient.GetSongInfo(songID)
 			firestoreCache.Set("track", songID, &songInfo)
+		} else {
+			dsnap.DataTo(&songInfo)
 		}
 
 		for _, hashtag := range storySong.Hashtag {

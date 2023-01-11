@@ -1,12 +1,18 @@
 package storySongHandler
 
+import (
+	"time"
+)
+
 type ResponseStorySong struct {
-	SongID         string   `json:"songId"`
-	SongName       string   `json:"songName"`
-	SongAlbumImage string   `json:"songAlbumImage"`
-	Artist         string   `json:"artist"`
-	SongHashTag    []string `json:"songHashTags"`
-	CreatedAt      int      `json:"createdAt"`
+	JID            uint      `json:"JID"`
+	SongID         string    `json:"songId"`
+	SongName       string    `json:"songName"`
+	SongAlbumImage string    `json:"songAlbumImage"`
+	Artist         string    `json:"artist"`
+	SongHashTag    []string  `json:"songHashTags"`
+	CreatedAt      int       `json:"createdAt"`
+	CreatedTime    time.Time `json:"createdTime"`
 }
 
 type ResponseStoty struct {

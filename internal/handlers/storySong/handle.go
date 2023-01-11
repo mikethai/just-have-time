@@ -1,14 +1,16 @@
 package storySongHandler
 
 import (
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/mikethai/just-have-time/database"
 	"github.com/mikethai/just-have-time/internal/firestoreClient"
 	userHandler "github.com/mikethai/just-have-time/internal/handlers/user"
 	"github.com/mikethai/just-have-time/internal/model"
-	"net/http"
-	"strconv"
 )
 
 const kkImageUrl = "https://i.kfs.io/muser/global/"
@@ -78,6 +80,7 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 		var newHastags []string
 		var songInfo *model.SongInfo
 
+		jid := storySong.ID
 		songID := storySong.SongID
 		msno := storySong.Msno
 
@@ -97,12 +100,14 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 		}
 
 		newResponseStorySong := ResponseStorySong{
+			JID:            jid,
 			SongID:         songID,
 			SongName:       songInfo.Name,
 			SongAlbumImage: songAlbumImage,
 			Artist:         songInfo.Album.Artist.Name,
 			SongHashTag:    newHastags,
 			CreatedAt:      int(storySong.CreatedAt.Unix()),
+			CreatedTime:    time.Unix(int64(storySong.CreatedAt.Unix()), 0),
 		}
 
 		entry, mapExist := storysMap[msno]

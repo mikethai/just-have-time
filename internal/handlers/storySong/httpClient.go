@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/mikethai/just-have-time/config"
+	"github.com/mikethai/just-have-time/internal/model"
 )
 
 const authHeaderField = "Authorization"
 const openApiUrl = "https://api.kkbox.com/v1.1/"
 
 type HttpClient interface {
-	GetSongInfo(songID string) (*SongInfo, error)
+	GetSongInfo(songID string) (*model.SongInfo, error)
 }
 
 type httpClient struct {
@@ -25,39 +26,8 @@ func NewHttpClient(client *http.Client) *httpClient {
 	}
 }
 
-type SongInfo struct {
-	Id       string    `json:"id" firestore:"id,omitempty"`
-	Name     string    `json:"name" firestore:"name,omitempty"`
-	Duration int       `json:"duration" firestore:"duration,omitempty"`
-	Isrc     string    `json:"isrc" firestore:"isrc,omitempty"`
-	Url      string    `json:"url" firestore:"url,omitempty"`
-	Album    AlbumInfo `json:"album" firestore:"album,omitempty"`
-}
-
-type AlbumInfo struct {
-	Id          string      `json:"id" firestore:"id,omitempty"`
-	Name        string      `json:"name" firestore:"name,omitempty"`
-	Url         string      `json:"url" firestore:"url,omitempty"`
-	ReleaseDate string      `json:"release_date" firestore:"release_date,omitempty"`
-	Images      []ImageInfo `json:"images" firestore:"images,omitempty"`
-	Artist      ArtistInfo  `json:"artist" firestore:"artist,omitempty"`
-}
-
-type ImageInfo struct {
-	Height int    `json:"height" firestore:"height,omitempty"`
-	Width  int    `json:"width" firestore:"width,omitempty"`
-	Url    string `json:"url" firestore:"url,omitempty"`
-}
-
-type ArtistInfo struct {
-	Id     string      `json:"id" firestore:"id,omitempty"`
-	Name   string      `json:"name" firestore:"name,omitempty"`
-	Url    string      `json:"url" firestore:"url,omitempty"`
-	Images []ImageInfo `json:"images" firestore:"images,omitempty"`
-}
-
-func (client *httpClient) GetSongInfo(songID string) (*SongInfo, error) {
-	var songInfo SongInfo
+func (client *httpClient) GetSongInfo(songID string) (*model.SongInfo, error) {
+	var songInfo model.SongInfo
 
 	url := openApiUrl + "tracks/" + songID + "?territory=TW"
 	req, _ := http.NewRequest("GET", url, nil)

@@ -1,6 +1,7 @@
 package storySongHandler
 
 import (
+	"sort"
 	"time"
 )
 
@@ -16,28 +17,29 @@ type ResponseStorySong struct {
 }
 
 type ResponseStoty struct {
-	Msno         string              `json:"msno"`
-	UserImage    string              `json:"userImage"`
-	UserName     string              `json:"userName"`
-	UserHashTags []string            `json:"userHashTags"`
-	Songs        []ResponseStorySong `json:"songs"`
+	Msno           string              `json:"msno"`
+	UserImage      string              `json:"userImage"`
+	UserName       string              `json:"userName"`
+	UserHashTags   []string            `json:"userHashTags"`
+	Songs          []ResponseStorySong `json:"songs"`
+	lastUpdateTime int                 `json:"lastUpdateTime"`
 }
 
 func getStorysAsSlice(storyMap map[string]ResponseStoty, msno string) []ResponseStoty {
-	// Defines the Slice length to match the Map elements count
-	sm := make([]ResponseStoty, len(storyMap))
 
-	i := 0
-	for _, tx := range storyMap {
-		if msno == tx.Msno {
-			copy(sm[1:], sm)
-			sm[0] = tx
-		} else {
-			sm[i] = tx
+	var storyCards []ResponseStoty
+	var keys []string
+	for k, v := range storyMap {
+		if msno == k {
+			v.lastUpdateTime = int(time.Now().Unix())
 		}
-
-		i++
+		keys = append(keys, k)
+		storyCards = append(storyCards, v)
 	}
 
-	return sm
+	sort.SliceStable(storyCards, func(i, j int) bool {
+		return storyCards[i].lastUpdateTime > storyCards[j].lastUpdateTime
+	})
+
+	return storyCards
 }

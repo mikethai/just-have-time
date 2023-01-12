@@ -119,11 +119,12 @@ func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 			}
 
 			storysMap[msno] = ResponseStoty{
-				Msno:         msno,
-				UserImage:    kkImageUrl + strconv.FormatInt(storySong.User.MsnoInt, 10) + "/cropresize/300x300.jpg",
-				UserName:     storySong.User.UserName,
-				UserHashTags: userTags,
-				Songs:        songs,
+				Msno:           msno,
+				UserImage:      kkImageUrl + strconv.FormatInt(storySong.User.MsnoInt, 10) + "/cropresize/300x300.jpg",
+				UserName:       storySong.User.UserName,
+				UserHashTags:   userTags,
+				Songs:          songs,
+				lastUpdateTime: int(storySong.CreatedAt.Unix()),
 			}
 		}
 	}

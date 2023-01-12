@@ -60,6 +60,18 @@ func ValidateStruct(storySong StorySong) []*ErrorResponse {
 	return errors
 }
 
+func (h *Handler) DeleteStorySong(c *fiber.Ctx) error {
+	ID := c.Params("ID")
+	IDInt, _ := strconv.Atoi(ID)
+	err := h.repository.Delete(IDInt)
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"status": "error", "message": "Delete story song error", "data": err})
+	}
+
+	return c.JSON(fiber.Map{"status": "success", "message": "Delete Story Song success", "data": ""})
+}
+
 func (h *Handler) GetStorySongs(c *fiber.Ctx) error {
 	storysMap := make(map[string]ResponseStoty)
 

@@ -11,6 +11,7 @@ import (
 type Repository interface {
 	List() ([]model.StorySong, error)
 	Create(param *CreateParameter) (*model.StorySong, error)
+	Delete(ID int) error
 	CreateHashTag(param *CreateHashTagParameter) (*model.StorySong, error)
 }
 
@@ -82,4 +83,9 @@ func (r *repository) CreateHashTag(param *CreateHashTagParameter) (*model.StoryS
 	}
 
 	return &param.storySongModel, nil
+}
+
+func (r *repository) Delete(ID int) error {
+	r.db.Delete(&model.StorySong{}, ID)
+	return nil
 }

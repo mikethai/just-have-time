@@ -21,4 +21,6 @@ func SetupStorySongRoutes(router fiber.Router) {
 	// Create a story song
 	router.Post("/story-card", newstorySongHandler.CreateStorySongs)
 
+	// Delete a story song
+	router.Delete("/story-card/:ID", newstorySongHandler.DeleteStorySong)
 }
